@@ -11,6 +11,69 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Birthstone&family=Bitcount:wght@100..900&family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Momo+Signature&family=Pacifico&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .player-card {
+            max-width: 340px;
+            margin: 0 auto;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .player-card .card-body {
+            padding: 0.75rem 1rem;
+        }
+        .player-card .btn {
+            width: 52px;
+            height: 52px;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(245, 71, 71, 0.6);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.16);
+            color: #dc7b7b;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+        }
+        .player-card .btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.28);
+        }
+        .player-card .btn i {
+            opacity: 1;
+            transition: transform 0.25s ease-in-out;
+        }
+        /* Removed green player indicator animation for cleaner UI */
+        .player-card .player-indicator {
+            display: none;
+        }
+        #playerStatus {
+            margin: 0.35rem 0 0;
+            font-size: 0.88rem;
+            letter-spacing: 0.02em;
+            color: #e8f0ff;
+        }
+        @media (max-width: 576px) {
+            .player-card {
+                max-width: 260px;
+                border-radius: 13px;
+                box-shadow: 0 10px 22px rgba(0,0,0,0.34);
+            }
+            .player-card .btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.05rem;
+            }
+            .player-card .btn i {
+                font-size: 1rem;
+            }
+            .player-card .card-body {
+                padding: 0.75rem 0.7rem;
+            }
+        }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
 </head>
@@ -27,6 +90,15 @@
                     <h2 class="date">
                         20th April 2026
                     </h2>
+                    <div class="card player-card mt-3 mx-auto">
+                        <div class="card-body text-center position-relative">
+                            <span class="player-indicator" aria-hidden="true"></span>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <button id="btnPlay" class="btn btn-outline-light btn-sm" type="button" style="width: 44px; height: 44px; border-radius: 50%;"><i class="fas fa-play"></i></button>
+                                <button id="btnPause" class="btn btn-outline-light btn-sm" type="button" style="width: 44px; height: 44px; border-radius: 50%;"><i class="fas fa-pause"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -85,6 +157,69 @@
             </div>
         </div>
     </div>
+    <audio id="bgm" loop preload="auto" autoplay muted playsinline>
+        <source src="images/song.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        const bgm = document.getElementById('bgm');
+        const btnPlay = document.getElementById('btnPlay');
+        const btnPause = document.getElementById('btnPause');
+        function showFallback() {
+            btnPlay.disabled = false;
+        }
+
+        bgm.play().then(() => {
+            bgm.muted = false;
+            document.querySelector('.player-card').classList.add('playing');
+            btnPlay.disabled = true;
+        }).catch((err) => {
+            console.warn('Autoplay blocked or unavailable', err);
+            bgm.muted = true;
+            btnPlay.disabled = false;
+            document.querySelector('.player-card').classList.remove('playing');
+            showFallback();
+        });
+
+        btnPlay.addEventListener('click', () => {
+            bgm.play().then(() => {
+                bgm.muted = false;
+                document.querySelector('.player-card').classList.add('playing');
+                btnPlay.disabled = true;
+            }).catch((err) => {
+                console.warn('Play failed', err);
+                showFallback();
+            });
+        });
+
+        btnPause.addEventListener('click', () => {
+            bgm.pause();
+            btnPlay.disabled = false;
+            document.querySelector('.player-card').classList.remove('playing');
+        });
+
+        btnPlay.addEventListener('click', () => {
+            bgm.play().then(() => {
+                bgm.muted = false;
+                btnPlay.disabled = true;
+                updateStatus('Now playing: Premalu BGM');
+            }).catch((err) => {
+                console.warn('Play failed', err);
+                showFallback();
+            });
+        });
+
+        btnPause.addEventListener('click', () => {
+            bgm.pause();
+            btnPlay.disabled = false;
+            updateStatus('Paused');
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && !bgm.paused) {
+                bgm.muted = false;
+            }
+        });
+    </script>
 </body>
 
 </html>
